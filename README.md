@@ -1,2 +1,2 @@
-# teerace
+# TeeRace
 Pancakes for everyone!!!
