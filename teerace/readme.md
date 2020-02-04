@@ -7,3 +7,5 @@
 
 **all time:**
 * ./bam-0.5.1/bam -f conf=release server arch=x86_64 && cp build/x86_64/release/teeworlds_srv /root/server/ *(your dst path)*
+
+...or use Google to find out how else to compile :)
