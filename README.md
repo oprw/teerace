@@ -6,4 +6,4 @@
 1. edit, run 'telnet.php' without arguments or with 'solo' (or run two copies without and with argument), put it in cron\systemd\etc
 1. **Congratulations! Now you have full copies of both servers**
 
-# Pancakes for everyone
+# Pancakes for everyone (ʘ‿ʘ)
