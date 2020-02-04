@@ -1,0 +1,35 @@
+#bindaddr 0.0.0.0
+sv_port 8304
+sv_name "---=[TeeRace Solo]=---"
+#password "EaYaSCNhtS"
+sv_rcon_password ""
+sv_rcon_mod_password ""
+sv_map "/solo/Kobra_Solo"
+sv_register 1
+logfile "/dev/null"
+#logfile "/root/server/log_solo"
+sv_max_clients 64
+sv_max_clients_per_ip 6
+sv_tournament_mode 0
+sv_vote_kick 0
+sv_vote_spectate 0
+sv_suicide_prevention 0
+sv_player_slots 60
+sv_slash_me 0
+sv_pauseable 1
+sv_inactivekick_time 20
+sv_inactivekick 1
+
+sv_rescue_tries 15
+
+tune player_hooking 0
+tune player_collision 0
+sv_swap 0
+sv_hit 0
+
+
+sv_motd ""
+
+#ec_bindaddr 127.0.0.1
+ec_password 12345
+ec_port 8404

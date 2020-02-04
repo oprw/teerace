@@ -1,0 +1,30 @@
+#bindaddr 0.0.0.0
+sv_port 8305
+sv_name "---=[TeeRace TEST]=---"
+password "EaYaSCNhtS"
+sv_rcon_password ""
+sv_rcon_mod_password ""
+sv_map "Light_Grey"
+sv_register 1
+logfile "/dev/null"
+#logfile "/root/server/log"
+sv_max_clients 64
+sv_max_clients_per_ip 6
+sv_tournament_mode 0
+sv_vote_kick 1
+sv_suicide_prevention 0
+sv_player_slots 60
+sv_slash_me 0
+sv_pauseable 1
+
+tune laser_bounce_num 1
+tune laser_bounce_cost 0
+
+sv_rescue_tries 30
+#sv_freeze_delay 1
+
+sv_motd ""
+
+#ec_bindaddr 127.0.0.1
+ec_password 12345
+ec_port 8405
