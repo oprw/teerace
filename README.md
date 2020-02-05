@@ -4,7 +4,7 @@
 1. modify 'cfg_', 'cfg_solo'
 1. put directory 'data' (it contain a folder with maps\etc) to the same directory where located server
 1. run server with argument 'exec cfg_' or 'exec cfg_solo' (or run two servers with both arguments), put it in cron\systemd\etc
-1. apt install php-cli php-curl php-mbstring php-sqlite3
+1. apt install *(or your package manager)* php-cli php-curl php-mbstring php-sqlite3
 1. edit, run 'telnet.php' without arguments or with 'solo' (or run two copies without and with argument), put it in cron\systemd\etc
 1. **Congratulations! Now you have full copies of both servers**
 
