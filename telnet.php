@@ -116,6 +116,7 @@ function create_cfg($new_random_map='')
 {
 	global $maps_dir, $records_dir, $maps_arr, $srv, $db_host, $db_pass, $multi_start_crop_pos, $random_map;
 
+
 	$maps_limit = 100;
 
 	$maps_temp_arr = preg_grep('/^([^.])/', scandir($maps_dir));
@@ -340,6 +341,15 @@ function players_today($buf)
 	return $msg;
 }
 
+function crop_buf()
+{
+	global $out;
+	$crop = explode(':', $out)[6];
+	$crop = trim($crop);
+
+	return $crop;
+}
+
 
 
 ob_implicit_flush();
@@ -369,7 +379,7 @@ $multi_start_crop_pos=0;
 while(true)
 {
 
-	$out = socket_read($socket, 512);
+	$out = socket_read($socket, 512, PHP_NORMAL_READ);
 	if(!$out)
 	{
 		socket_clear_error($socket);
@@ -377,7 +387,7 @@ while(true)
 		connect_telnet();
 		continue;
 	}
-	if(substr_count($out, 'Enter password:'))
+	if($out == "Enter password:\n")
 	{
 		send_cmd($pass);
 		#sleep(1);
@@ -391,12 +401,11 @@ while(true)
 	}
 
 
-	#print $out;
+	#print "--=".$out."=--";
 
-	if(substr_count($out, '[server]: player has entered the game. ClientID='))
+	if(substr($out, 22, 18) == 'player has entered')
 	{
-
-		$player_id = bin2hex(parse($out, '[server]: player has entered the game. ClientID=', ' addr='));
+		$player_id = bin2hex(parse($out, 'ClientID=', ' addr='));
 		if($player_id != '2d31')
 		{
 			$player_ip = bin2hex(parse($out, 'addr=', ':'));
@@ -417,28 +426,29 @@ while(true)
 		}
 	}
 
-	if(substr_count($out, '[server]: client dropped. cid='))
+	if(substr($out, 22, 14) == 'client dropped')
 	{
-		$player_id = bin2hex(parse($out, '[server]: client dropped. cid=', ' addr='));
+		$player_id = bin2hex(parse($out, 'cid=', ' addr='));
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 		$db->exec('DELETE FROM '.$db_online.'  WHERE id="'.$player_id.'"');
 		$db->close();
 	}
 
-	if(substr_count($out, '][Console]: ReSlice_TOP_-'))
+	if(substr($out, 23, 13) == 'ReSlice_TOP_-')
 	{
 		$multi_start_crop_pos = parse($out, 'ReSlice_TOP_-','|');
 		create_cfg();
 	}
 
-	if(substr_count($out, '][Console]: Start_Gen_Random_Map'))
+	if(substr($out, 23, 20) == 'Start_Gen_Random_Map')
 	{
 		#$current_map = parse($out, '[server]: maps/', ' sha256 is ');
 		#file_put_contents(__DIR__.'/maps_history', $current_map.'|||', FILE_APPEND);
 		create_cfg('gen_random_map');
 	}
 
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !time\n"))
+
+	if(crop_buf() == '!time')
 	{
 		$player_id = bin2hex(parse($out, '][chat]: ', ':'));
 
@@ -462,7 +472,7 @@ while(true)
 		send_msg($msg);
 	}
 
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !online\n"))
+	if(crop_buf() == '!online')
 	{
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 		$count_online = $db->querySingle('SELECT COUNT(*) FROM '.$db_online);
@@ -470,29 +480,29 @@ while(true)
 		$msg = 'Now '.$count_online.' player(s) online';
 		send_msg($msg);
 	}
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !stat_all\n"))
+	if(crop_buf() == '!stat_all')
 	{
 		send_msg('Use \"!top\" instead');
 	}
-	if(substr_count($out, 'chat]: ') and (substr_count($out, ": !top\n") or substr_count($out, ": !top5\n")))
+	if(crop_buf() == '!top' or crop_buf() == '!top5')
 	{
 		players_top('', 5);
 	}
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !top10\n"))
+	if(crop_buf() == '!top10')
 	{
 		players_top('', 10);
 	}
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !stat\n"))
+	if(crop_buf() == '!stat')
 	{
 		$msg = player_stat($out);
 		send_msg($msg);
 	}
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !stat "))
+	if(substr(crop_buf(), 0, 6) == '!stat ')
 	{
 		$msg = player_stat($out, 'parse');
 		send_msg($msg);
 	}
-	if(substr_count($out, 'chat]: ') and substr_count($out, ": !server\n"))
+	if(crop_buf() == '!server')
 	{
 		$msg = players_today($out);
 		send_msg($msg);
