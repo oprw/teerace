@@ -32,9 +32,9 @@ if($srv == 'solo')
 $records_dir = '/root/.local/share/teeworlds/records/';
 
 
-if(file_exists($start_file))
-	exit;
-touch($start_file);
+#if(file_exists($start_file))
+#	exit;
+#touch($start_file);
 
 
 
