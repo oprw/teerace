@@ -3,6 +3,8 @@ date_default_timezone_set('Europe/Moscow');
 set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
+$ver = '0.2';
+
 
 $pass = '12345';
 
@@ -28,7 +30,7 @@ if($srv == 'solo')
 
 }
 
-
+$maplist_type = 'unfinished';
 $records_dir = '/root/.local/share/teeworlds/records/';
 
 
@@ -103,7 +105,6 @@ function send_welcome($player_id, $text)
 {
 	global $socket;
 	$text = 'fake 3 '.$player_id.' '.$player_id.' "'.$text.'"';
-	#print $text;
 	socket_write($socket, $text."\n", strlen($text)+1);
 }
 function send_cmd($text)
@@ -114,7 +115,7 @@ function send_cmd($text)
 
 function create_cfg($new_random_map='')
 {
-	global $maps_dir, $records_dir, $maps_arr, $srv, $db_host, $db_pass, $multi_start_crop_pos, $random_map;
+	global $maps_dir, $records_dir, $maps_arr, $srv, $multi_start_crop_pos, $random_map, $maplist_type, $maps_count;
 
 
 	$maps_limit = 100;
@@ -124,96 +125,111 @@ function create_cfg($new_random_map='')
 	unset($maps_temp_arr[array_search('solo',$maps_temp_arr)]);
 
 
-	$db = new SQLite3(dirname(__FILE__).'/db_records', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
-	$results = $db->query('SELECT * FROM records');
+	$db = new SQLite3(dirname(__FILE__).'/db_records', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);	
 	$vote_finished_maps_arr = array();
-	while($arr = $results->fetchArray(SQLITE3_ASSOC))
+	if($maplist_type == 'unfinished')
 	{
-		$db_player_name = $arr['player_name'];
-		$db_map_name = $arr['map_name'];
-		$db_map_name = str_replace('_record.dtb', '.map', hex2bin($db_map_name));
-		if(in_array($db_map_name, $maps_arr_bak))
+		foreach($maps_arr_bak as $map_name)
 		{
-			$key = array_search($db_map_name, $maps_temp_arr);
-			$vote_finished_maps_arr[$db_map_name] += 1;
-			#if(!$solo)
-				unset($maps_temp_arr[$key]);
+
+			$temp_map_name = bin2hex(str_replace('.map', '_record.dtb', $map_name));
+			$db_res = $db->querySingle('SELECT DISTINCT "map_name" FROM "records" WHERE map_name = "'.$temp_map_name.'"', true);
+			if(!count($db_res))
+			{
+				$key = array_search($map_name, $maps_temp_arr);
+				$vote_finished_maps_arr[$map_name] += 1;
+				if(is_int($key))
+				{
+					unset($maps_temp_arr[$key]);
+				}
+			}
+
 		}
+	}else{
+		$results = $db->query('SELECT "map_name" FROM "records"');
+		while($arr = $results->fetchArray(SQLITE3_ASSOC))
+		{
+			$db_player_name = $arr['player_name'];
+			$db_map_name = $arr['map_name'];
+			$db_map_name = str_replace('_record.dtb', '.map', hex2bin($db_map_name));
+			if(in_array($db_map_name, $maps_arr_bak))
+			{
 
+				$key = array_search($db_map_name, $maps_temp_arr);
+				$vote_finished_maps_arr[$db_map_name] += 1;
+				if(is_int($key))
+					unset($maps_temp_arr[$key]);
+			}
+		}
 	}
-	$db->close();
 
-	
-	#if($srv == 'solo')
-	#	arsort($vote_finished_maps_arr);
-	#else
-	#	asort($vote_finished_maps_arr);
+
+	$db->close();
+	unset($maps_arr_bak);
+
 
 	$count_vote_finished_maps_arr = count($vote_finished_maps_arr);
-
-
-	arsort($vote_finished_maps_arr);
-
+	if($maplist_type == 'unfinished')
+		ksort($vote_finished_maps_arr);
+	else
+		arsort($vote_finished_maps_arr);
 	$vote_finished_maps_arr = array_slice($vote_finished_maps_arr, $multi_start_crop_pos, $maps_limit);
 
 
-	unset($maps_arr_bak);
-
 	if(!count($maps_arr))
-	{
-
 		$maps_arr = $maps_temp_arr;
-		
-		/*
-		if($srv != 'solo')
-		{
-			$maps_arr_bak = $maps_arr;
-			$maps_history = explode('|||', file_get_contents(__DIR__.'/maps_history'));
-			foreach($maps_history as $value)
-			{
-				$key = array_search($value,$maps_arr);
-				unset($maps_arr[$key]);
-			}
-			if(!count($maps_arr))
-			{
-				$maps_arr = $maps_arr_bak;
-				unlink(__DIR__.'/maps_history');
-			}
-		}
-		*/
-		
-	}
-	unset($maps_arr_bak);
-	shuffle($maps_arr);
-	if(strlen($new_random_map))
-		$random_map = str_replace('.map', '', array_shift($maps_arr));
+	unset($maps_temp_arr);
 
+	shuffle($maps_arr);
 	
-	print "random_map:\t\t".$random_map."\n";
-	$maps_count = count($maps_arr);
+	if(strlen($new_random_map))
+	{
+		$maps_count = count($maps_arr);
+		$random_map = str_replace('.map', '', array_shift($maps_arr));
+		print "random_map:\t\t".$random_map."\n";
+	}	
+
+	if($maplist_type == 'unfinished')
+	{
+		$rand_str = 'finished';
+		$vote_str = 'unfinished';
+	}else{
+		$rand_str = 'unfinished';
+		$vote_str = 'top';
+	}
 
 	send_cmd('clear_votes');
-	if($srv == 'solo')
-		send_cmd('add_vote "[random #'.$maps_count.'] '.$random_map.'" "echo Start_Gen_Random_Map; change_map /solo/'.$random_map.'"');
-	else
-		send_cmd('add_vote "[random #'.$maps_count.'] '.$random_map.'" "echo Start_Gen_Random_Map; change_map '.$random_map.'"');
 
-	
+
+	if($maplist_type == 'unfinished')
+		$vote_maplist_type = 'finished';
+	else
+		$vote_maplist_type = 'unfinished';
+	send_cmd('add_vote "[cfg] Show maplist for '.$vote_maplist_type.' maps" "echo Change_Maplist_Type_-'.$vote_maplist_type.'|"');
 
 	$i = $multi_start_crop_pos+1;
 	$vote_change_top = $multi_start_crop_pos+$maps_limit;
 	if($vote_change_top>$count_vote_finished_maps_arr)
 		$vote_change_top = 0;
-	send_cmd('add_vote "--- [cfg] Start maplist from #'.($vote_change_top+1).'" "echo ReSlice_TOP_-'.$vote_change_top.'|"');
+	send_cmd('add_vote "[cfg] Show maplist from #'.($vote_change_top+1).'" "echo ReSlice_TOP_-'.$vote_change_top.'|"');
+
+	send_cmd('add_vote "----------------" "echo line"');
+
+	if($srv == 'solo')
+		send_cmd('add_vote "['.$rand_str.' #'.$maps_count.'] '.$random_map.'" "echo Start_Gen_Random_Map; change_map /solo/'.$random_map.'"');
+	else
+		send_cmd('add_vote "['.$rand_str.' #'.$maps_count.'] '.$random_map.'" "echo Start_Gen_Random_Map; change_map '.$random_map.'"');
+
+	send_cmd('add_vote "---------------" "echo line"');
 
 	foreach($vote_finished_maps_arr as $key=>$value)
 	{
 		$key = str_replace('.map', '', $key);
 
 		if($srv == 'solo')
-			send_cmd('add_vote "[top #'.$i.'] '.$key.'" "change_map /solo/'.$key.'"');
+			send_cmd('add_vote "['.$vote_str.' #'.$i.'] '.$key.'" "change_map /solo/'.$key.'"');
 		else
-			send_cmd('add_vote "[top #'.$i.'] '.$key.'" "change_map '.$key.'"');
+			send_cmd('add_vote "['.$vote_str.' #'.$i.'] '.$key.'" "change_map '.$key.'"');
 		$i += 1;
 	}
 
@@ -222,7 +238,7 @@ function create_cfg($new_random_map='')
 
 function player_stat($buf, $parse_from_text='')
 {
-	global $records_dir, $db_host, $db_pass, $maps_dir;
+	global $records_dir, $maps_dir;
 	$curr_maps_arr = preg_grep('/^([^.])/', scandir($maps_dir));
 	if($parse_from_text)
 	{
@@ -273,7 +289,7 @@ function player_stat($buf, $parse_from_text='')
 
 function players_top($player_name='', $num_count='')
 {
-	global $db_host, $db_pass, $maps_dir;
+	global $maps_dir;
 	$curr_maps_arr = preg_grep('/^([^.])/', scandir($maps_dir));
 	$db = new SQLite3(dirname(__FILE__).'/db_records', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 	$results = $db->query('SELECT * FROM records');
@@ -336,7 +352,6 @@ function players_today($buf)
 	$db = new SQLite3(dirname(__FILE__).'/'.$db_today, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 	$today = $db->querySingle('SELECT COUNT(*) FROM '.$db_today);
 	$msg = 'Today '.$today.' people played on the server';
-	print $msg;
 	$db->close();
 	return $msg;
 }
@@ -403,7 +418,7 @@ while(true)
 
 	#print "--=".$out."=--";
 
-	if(substr($out, 22, 18) == 'player has entered')
+	if(substr($out, 12, 28) == '[server]: player has entered')
 	{
 		$player_id = bin2hex(parse($out, 'ClientID=', ' addr='));
 		if($player_id != '2d31')
@@ -414,8 +429,6 @@ while(true)
 			$player_nick = parse($player_nick, ' ', "\n");
 			$player_nick = bin2hex(trim($player_nick));
 
-			#$msg = 'Welcome '.hex2bin($player_nick).'! ^_^';
-			#send_welcome(hex2bin($player_id), $msg);
 			
 			$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 			$db->query('CREATE TABLE IF NOT EXISTS "'.$db_online.'" ("id" VARCHAR NOT NULL, "ip" VARCHAR NOT NULL, "nick" VARCHAR NOT NULL)');
@@ -426,7 +439,7 @@ while(true)
 		}
 	}
 
-	if(substr($out, 22, 14) == 'client dropped')
+	if(substr($out, 12, 24) == '[server]: client dropped')
 	{
 		$player_id = bin2hex(parse($out, 'cid=', ' addr='));
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
@@ -434,16 +447,21 @@ while(true)
 		$db->close();
 	}
 
-	if(substr($out, 23, 13) == 'ReSlice_TOP_-')
+	if(substr($out, 12, 23) == '[Console]: ReSlice_TOP_')
 	{
 		$multi_start_crop_pos = parse($out, 'ReSlice_TOP_-','|');
 		create_cfg();
 	}
 
-	if(substr($out, 23, 20) == 'Start_Gen_Random_Map')
+	if(substr($out, 12, 32) == '[Console]: Change_Maplist_Type_-')
 	{
-		#$current_map = parse($out, '[server]: maps/', ' sha256 is ');
-		#file_put_contents(__DIR__.'/maps_history', $current_map.'|||', FILE_APPEND);
+		$maplist_type = parse($out, 'Change_Maplist_Type_-','|');
+		unset($maps_arr);
+		create_cfg('gen_random_map');
+	}
+
+	if(substr($out, 12, 31) == '[Console]: Start_Gen_Random_Map')
+	{
 		create_cfg('gen_random_map');
 	}
 
@@ -454,13 +472,13 @@ while(true)
 
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 		$db_res = $db->querySingle('SELECT "ip" FROM "'.$db_online.'" WHERE "id" = "'.$player_id.'"', true);
-		$db->close();		
+		$db->close();
 
 		$ipinfo = send('https://api.ipdata.co/'.hex2bin($db_res['ip']).'/time_zone/?api-key=9b8a49e10bc989a900a2d1052999045d9450c3cee479de571ac81d9e');
 		$offset = parse($ipinfo, '"offset": "', '"');
 		$offset = str_replace('+0', '+', $offset);
 		$offset = rtrim($offset, '0');
-		$offset = 'UTC'.$offset;		
+		$offset = 'UTC'.$offset;
 		$time = parse($ipinfo, '"current_time": "', '.');
 
 		$date = date_create($time);
@@ -502,12 +520,17 @@ while(true)
 		$msg = player_stat($out, 'parse');
 		send_msg($msg);
 	}
-	if(crop_buf() == '!server')
+	if(crop_buf() == '!server' or crop_buf() == '!info')
 	{
+		$msg = '-- TeeRace econ v'.$ver;
+		send_msg($msg);
+
 		$msg = players_today($out);
 		send_msg($msg);
+
 		$f1 = preg_grep('/^([^.])/', scandir($records_dir));
 		$f2 = preg_grep('/^([^.])/', scandir($maps_dir));
+		unset($f2[array_search('solo',$f2)]);
 		$finished_maps_count = 0;
 		foreach($f1 as $rec_v)
 		{
