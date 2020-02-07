@@ -3,9 +3,8 @@ date_default_timezone_set('Europe/Moscow');
 set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
-$ver = '0.2';
 
-
+$ver = '0.2.1';
 $pass = '12345';
 
 $srv = $argv[1];
@@ -393,6 +392,11 @@ $multi_start_crop_pos=0;
 
 while(true)
 {
+	if(date('H:i', time()) == '00:00' and $last_clear != date('d', time())
+	{
+		$last_clear = date('d', time();
+		unlink(__DIR__.'/db_today');
+	}
 
 	$out = socket_read($socket, 512, PHP_NORMAL_READ);
 	if(!$out)
