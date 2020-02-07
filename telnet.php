@@ -392,9 +392,9 @@ $multi_start_crop_pos=0;
 
 while(true)
 {
-	if(date('H:i', time()) == '00:00' and $last_clear != date('d', time())
+	if(date('H:i', time()) == '00:00' and $last_clear != date('d', time()))
 	{
-		$last_clear = date('d', time();
+		$last_clear = date('d', time());
 		unlink(__DIR__.'/db_today');
 	}
 
