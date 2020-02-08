@@ -461,6 +461,7 @@ while(true)
 	{
 		$maplist_type = parse($out, 'Change_Maplist_Type_-','|');
 		unset($maps_arr);
+		$multi_start_crop_pos = 0;
 		create_cfg('gen_random_map');
 	}
 
@@ -545,6 +546,9 @@ while(true)
 			}
 		}
 		$msg = $finished_maps_count.' of '.count($f2).' maps completed by players';
+		send_msg($msg);
+
+		$msg = '-- https://github.com/oprw/teerace';
 		send_msg($msg);
 	}
 }
