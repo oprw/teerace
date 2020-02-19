@@ -4,7 +4,7 @@ set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 
-$ver = '0.2.1';
+$ver = '0.2.2';
 $pass = '12345';
 
 $srv = $argv[1];
@@ -333,7 +333,13 @@ function players_top($player_name='', $num_count='')
 
 function save_player($buf)
 {
-	global $db_today;
+	global $db_today, $last_clear;
+
+	if($last_clear != date('d', time()))
+	{
+		$last_clear = date('d', time());
+		unlink(__DIR__.'/'.$db_today);
+	}
 
 	$db = new SQLite3(dirname(__FILE__).'/'.$db_today, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 	$db->query('CREATE TABLE IF NOT EXISTS "'.$db_today.'" ("player_ip" VARCHAR NOT NULL)');
@@ -392,12 +398,6 @@ $multi_start_crop_pos=0;
 
 while(true)
 {
-	if(date('H:i', time()) == '00:00' and $last_clear != date('d', time()))
-	{
-		$last_clear = date('d', time());
-		unlink(__DIR__.'/db_today');
-	}
-
 	$out = socket_read($socket, 512, PHP_NORMAL_READ);
 	if(!$out)
 	{
