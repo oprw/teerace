@@ -254,7 +254,7 @@ function player_stat($buf, $parse_from_text='')
 		return $msg;
 	}
 
-	if(!strlen($player_name))
+	if(!strlen($player_name) or strlen(utf8_decode($player_name))>32)
 	{
 		$msg = 'Bad nickname :(';
 		return $msg;
