@@ -97,13 +97,13 @@ function send($url,$post_data="")
 function send_msg($text)
 {
 	global $socket;
-	$text = 'say "'.$text.'"';
+	$text = 'say "'.addslashes($text).'"';
 	socket_write($socket, $text."\n", strlen($text)+1);
 }
 function send_welcome($player_id, $text)
 {
 	global $socket;
-	$text = 'fake 3 '.$player_id.' '.$player_id.' "'.$text.'"';
+	$text = 'fake 3 '.$player_id.' '.$player_id.' "'.addslashes($text).'"';
 	socket_write($socket, $text."\n", strlen($text)+1);
 }
 function send_cmd($text)
@@ -250,7 +250,7 @@ function player_stat($buf, $parse_from_text='')
 
 	if($player_name=='blin4ik' or $player_name=='run')
 	{
-		$msg = 'Player \"'.$player_name.'\" finished ∞ map(s)';
+		$msg = 'Player "'.$player_name.'" finished ∞ map(s)';
 		return $msg;
 	}
 
@@ -279,7 +279,7 @@ function player_stat($buf, $parse_from_text='')
 	$db->close();
 
 
-	$msg = 'Player \"'.$player_name.'\" finished '.$maps_finished_count.' map(s)';
+	$msg = 'Player "'.$player_name.'" finished '.$maps_finished_count.' map(s)';
 	$player_rank = players_top(bin2hex($player_name));	
 	if(strlen($player_rank))
 		$msg .='. He is #'.$player_rank.' in top';
@@ -322,7 +322,7 @@ function players_top($player_name='', $num_count='')
 		{
 			if($i>$num_count)
 				break;
-			$msg = '#'.$i.'. \"'.hex2bin($key).'\" finished '.$value.' map(s)';
+			$msg = '#'.$i.'. "'.hex2bin($key).'" finished '.$value.' map(s)';
 			send_msg($msg);
 			$i += 1;
 		}
@@ -505,7 +505,7 @@ while(true)
 	}
 	if(crop_buf() == '!stat_all')
 	{
-		send_msg('Use \"!top\" instead');
+		send_msg('Use "!top" instead');
 	}
 	if(crop_buf() == '!top' or crop_buf() == '!top5')
 	{
