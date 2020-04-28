@@ -4,7 +4,7 @@ set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 
-$ver = '0.2.2';
+$ver = '0.2.3';
 $pass = '12345';
 
 $srv = $argv[1];
