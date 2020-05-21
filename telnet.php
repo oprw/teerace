@@ -99,18 +99,21 @@ function send_msg($text)
 {
 	global $socket;
 	$text = 'say "'.addslashes($text).'"';
-	socket_write($socket, $text."\n", strlen($text)+1);
+	$text .= "\n";
+	socket_write($socket, $text, strlen($text));
 }
 function send_welcome($player_id, $text)
 {
 	global $socket;
 	$text = 'fake 3 '.$player_id.' '.$player_id.' "'.addslashes($text).'"';
-	socket_write($socket, $text."\n", strlen($text)+1);
+	$text .= "\n";
+	socket_write($socket, $text, strlen($text));
 }
 function send_cmd($text)
 {
 	global $socket;
-	socket_write($socket, $text."\n", strlen($text)+1);
+	$text .= "\n";
+	socket_write($socket, $text, strlen($text));
 }
 
 function create_cfg($new_random_map='')
@@ -255,7 +258,7 @@ function player_stat($buf, $parse_from_text='')
 		return $msg;
 	}
 
-	if(!strlen($player_name) or mb_strlen($player_name, 'UTF-8')>32)
+	if(!mb_strlen($player_name,'UTF-8') or mb_strlen($player_name,'UTF-8')>32)
 	{
 		$msg = 'Bad nickname :(';
 		return $msg;
@@ -309,7 +312,7 @@ function players_top($player_name='', $num_count='')
 	$db->close();
 	arsort($top);
 
-	if(strlen($player_name))
+	if(mb_strlen($player_name,'UTF-8'))
 	{
 		$player_rank = array_search($player_name, array_keys($top));
 		if(strlen($player_rank))
