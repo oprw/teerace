@@ -17,6 +17,7 @@ sv_suicide_prevention 0
 sv_player_slots 60
 sv_slash_me 0
 sv_pauseable 1
+sv_pause_frequency 0
 sv_inactivekick_time 20
 sv_inactivekick 1
 
@@ -26,7 +27,6 @@ tune player_hooking 0
 tune player_collision 0
 sv_swap 0
 sv_hit 0
-
 
 sv_motd ""
 

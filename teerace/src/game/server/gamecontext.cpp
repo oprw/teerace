@@ -775,6 +775,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	SendChat(-1, CHAT_ALL, ClientID, "------------------------------------");
 	SendChat(-1, CHAT_ALL, ClientID, "Type \"/help\" to find other supported commands");
 	SendChat(-1, CHAT_ALL, ClientID, "------------------------------------");
+	SendChat(-1, CHAT_ALL, ClientID, "Sources: https://github.com/oprw/teerace");
 
 
 }
@@ -870,7 +871,8 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 	{
 		if(MsgID == NETMSGTYPE_CL_SAY)
 		{
-			if(g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat+Server()->TickSpeed() > Server()->Tick())
+			// divide tickspeed by 4, have to check if the message a server command first
+			if(g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat+Server()->TickSpeed()/4 > Server()->Tick())
 				return;
 
 			CNetMsg_Cl_Say *pMsg = (CNetMsg_Cl_Say *)pRawMsg;
@@ -901,14 +903,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			if(pEnd != 0)
 				*(const_cast<char *>(pEnd)) = 0;
 
-			// drop empty and autocreated spam messages (more than 20 characters per second)
-			if(Length == 0 || (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed()*(Length/20) > Server()->Tick()))
+			// drop empty
+			if(Length == 0)
 				return;
-
-			pPlayer->m_LastChat = Server()->Tick();
 
 			if(pMsg->m_pMessage[0] == '/')
 			{
+				pPlayer->m_LastChat = Server()->Tick();
+
 				m_ChatConsoleClientID = ClientID;
 				m_pChatConsole->SetFlagMask(CFGFLAG_SERVERCHAT);
 				//m_pChatConsole->ExecuteLine(pMsg->m_pMessage + 1);
@@ -923,6 +925,14 @@ void CGameContext::OnMessage(int MsgID, CUnpacker *pUnpacker, int ClientID)
 			}
 			else
 			{
+				// antispam protection for chat messages
+				if(g_Config.m_SvSpamprotection && pPlayer->m_LastChat + Server()->TickSpeed() > Server()->Tick())
+					return;
+				// also drop autocreated spam messages (more than 20 characters per second)
+				if(g_Config.m_SvSpamprotection && pPlayer->m_LastChat + Server()->TickSpeed()*(Length/20) > Server()->Tick())
+					return;
+				pPlayer->m_LastChat = Server()->Tick();
+
 				// don't allow spectators to disturb players during a running game in tournament mode
 				int Mode = pMsg->m_Mode;
 				if((g_Config.m_SvTournamentMode == 2) &&

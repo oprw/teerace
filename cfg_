@@ -4,7 +4,7 @@ sv_name "---=[TeeRace]=---"
 #password "EaYaSCNhtS"
 sv_rcon_password ""
 sv_rcon_mod_password ""
-sv_map "Light_Grey"
+sv_map "TeeWorld"
 sv_register 1
 logfile "/dev/null"
 #logfile "/root/server/log"
@@ -16,6 +16,7 @@ sv_suicide_prevention 0
 sv_player_slots 60
 sv_slash_me 0
 sv_pauseable 1
+sv_pause_frequency 0
 
 tune laser_bounce_num 1
 tune laser_bounce_cost 0
