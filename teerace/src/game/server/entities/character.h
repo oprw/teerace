@@ -172,7 +172,7 @@ private:
 		int m_Ammo;
 		bool m_Got;
 
-	} m_aWeapons[NUM_WEAPONS];
+	} m_aWeapons[NUM_WEAPONS], m_aSavedWeapons[NUM_WEAPONS];
 
 	int m_ActiveWeapon;
 	int m_LastWeapon;

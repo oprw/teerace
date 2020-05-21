@@ -969,9 +969,16 @@ void CCharacter::DDRaceTick()
 	int resc_index = GameServer()->Collision()->GetPureMapIndex(m_Core.m_Pos);
 	int resc_tile = GameServer()->Collision()->GetTileIndex(resc_index);
 	int resc_ftile = GameServer()->Collision()->GetFTileIndex(resc_index);
-	if(IsGrounded() && !m_Paused && resc_tile != TILE_FREEZE && resc_tile != TILE_DFREEZE && resc_ftile != TILE_FREEZE && resc_ftile != TILE_DFREEZE) {
+	if(IsGrounded() && !m_Paused && !m_DeepFreeze && resc_tile != TILE_FREEZE && resc_tile != TILE_DFREEZE && resc_ftile != TILE_FREEZE && resc_ftile != TILE_DFREEZE) {
+
+		for(int i = 0; i<NUM_WEAPONS; ++i)
+		{
+			m_aSavedWeapons[i] = m_aWeapons[i];
+		}
+		
 		m_PrevSavePos = m_Core.m_Pos;
 		m_SetSavePos = true;
+		
 	}
 		
 }
@@ -980,9 +987,11 @@ void CCharacter::Rescue()
 {
 	if(m_RescueCount>0)
 	{
-		if (m_SetSavePos && !m_DeepFreeze) {
+		if (m_SetSavePos) {
 			int res_index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
-			if (GameServer()->Collision()->GetTileIndex(res_index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(res_index) == TILE_FREEZE) {
+			if (GameServer()->Collision()->GetTileIndex(res_index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(res_index) == TILE_FREEZE ||
+				GameServer()->Collision()->GetTileIndex(res_index) == TILE_DFREEZE || GameServer()->Collision()->GetFTileIndex(res_index) == TILE_DFREEZE ||
+				m_DeepFreeze) {
 				m_Core.m_Pos = m_PrevSavePos;
 				m_Pos = m_PrevSavePos;
 				m_PrevPos = m_PrevSavePos;
@@ -994,6 +1003,13 @@ void CCharacter::Rescue()
 				m_Core.m_HookPos = m_Core.m_Pos;
 				//UnFreeze();
 
+				for(int i = 0; i < NUM_WEAPONS; ++i)
+				{
+					m_aWeapons[i] = m_aSavedWeapons[i];
+				}
+
+				m_DeepFreeze = 0;
+				
 				m_RescueCount--;
 
 				char aBuf[256];
