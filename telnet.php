@@ -91,6 +91,7 @@ function send($url,$post_data="")
 		curl_setopt($ch, CURLOPT_HTTPGET, 1);
 	}
 	$data=curl_exec($ch);
+	curl_close($ch);
 	return $data;
 }
 
