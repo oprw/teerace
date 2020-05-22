@@ -279,6 +279,12 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	else
 	{
 
+		if(pChar1->IsGrounded() == false || pChar2->IsGrounded() == false)
+		{
+			pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can\'t swap in midair!");
+			return;
+		}
+
 		CPlayerRescueState State1 = GetPlayerState(pChar1, ClientID),
 			State2 = GetPlayerState(pChar2, TargetID);
 
