@@ -4,7 +4,7 @@ set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 
-$ver = '0.2.3';
+$ver = '0.2.4';
 $pass = '12345';
 
 $srv = $argv[1];
@@ -124,11 +124,11 @@ function create_cfg($new_random_map='')
 	$maps_limit = 100;
 
 	$maps_temp_arr = preg_grep('/^([^.])/', scandir($maps_dir));
-	$maps_arr_bak = $maps_temp_arr;
 	unset($maps_temp_arr[array_search('solo',$maps_temp_arr)]);
+	$maps_arr_bak = $maps_temp_arr;
 
 
-	$db = new SQLite3(dirname(__FILE__).'/db_records', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);	
+	$db = new SQLite3(dirname(__FILE__).'/db_records', SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 	$vote_finished_maps_arr = array();
 	if($maplist_type == 'unfinished')
 	{
@@ -230,9 +230,9 @@ function create_cfg($new_random_map='')
 		$key = str_replace('.map', '', $key);
 
 		if($srv == 'solo')
-			send_cmd('add_vote "['.$vote_str.' #'.$i.'] '.$key.'" "change_map /solo/'.$key.'"');
+			send_cmd('add_vote "['.$vote_str.' #'.$i.'] '.$key.'" "echo Update_TOP; change_map /solo/'.$key.'"');
 		else
-			send_cmd('add_vote "['.$vote_str.' #'.$i.'] '.$key.'" "change_map '.$key.'"');
+			send_cmd('add_vote "['.$vote_str.' #'.$i.'] '.$key.'" "echo Update_TOP; change_map '.$key.'"');
 		$i += 1;
 	}
 
@@ -453,6 +453,11 @@ while(true)
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 		$db->exec('DELETE FROM '.$db_online.'  WHERE id="'.$player_id.'"');
 		$db->close();
+	}
+
+	if(substr($out, 12, 21) == '[Console]: Update_TOP')
+	{
+		create_cfg();
 	}
 
 	if(substr($out, 12, 23) == '[Console]: ReSlice_TOP_')
