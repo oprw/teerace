@@ -278,29 +278,6 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 	}
 	else
 	{
-		int index_player1 = pChar1->GameServer()->Collision()->GetMapIndex(pChar1->Core()->m_Pos);
-		int index_player2 = pChar2->GameServer()->Collision()->GetMapIndex(pChar2->Core()->m_Pos);
-		// TargetID agreed
-		if (pChar1->GameServer()->Collision()->CheckIndexEx(pChar1->Core()->m_Pos, TILE_BEGIN)
-			|| pChar2->GameServer()->Collision()->CheckIndexEx(pChar2->Core()->m_Pos, TILE_BEGIN)
-			|| pChar1->GameServer()->Collision()->CheckIndexEx(pChar1->Core()->m_Pos, TILE_END)
-			|| pChar2->GameServer()->Collision()->CheckIndexEx(pChar2->Core()->m_Pos, TILE_END)
-			|| pChar1->GameServer()->Collision()->IsTeleport(index_player1)
-			|| pChar2->GameServer()->Collision()->IsTeleport(index_player2)
-			|| pChar1->GameServer()->Collision()->IsEvilTeleport(index_player1)
-			|| pChar2->GameServer()->Collision()->IsEvilTeleport(index_player2)
-			|| pChar1->GameServer()->Collision()->IsCheckTeleport(index_player1)
-			|| pChar2->GameServer()->Collision()->IsCheckTeleport(index_player2)
-			|| pChar1->GameServer()->Collision()->IsCheckEvilTeleport(index_player1)
-			|| pChar2->GameServer()->Collision()->IsCheckEvilTeleport(index_player2)
-			|| pChar1->GameServer()->Collision()->IsTCheckpoint(index_player1)
-			|| pChar2->GameServer()->Collision()->IsTCheckpoint(index_player2)
-			)
-		{
-			// cool race time fix
-			pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "swap", "Can\'t swap here!");
-			return;
-		}
 
 		CPlayerRescueState State1 = GetPlayerState(pChar1, ClientID),
 			State2 = GetPlayerState(pChar2, TargetID);
@@ -308,6 +285,9 @@ void CGameContext::ConSwap(IConsole::IResult *pResult, void *pUserData)
 		// swap
 		SetPlayerState(State2, pChar1, ClientID);
 		SetPlayerState(State1, pChar2, TargetID);
+
+		pChar1->TickDefered();
+		pChar2->TickDefered();
 
 		str_format(aBuf, sizeof(aBuf), "%s swapped with %s.",
 			   pSelf->Server()->ClientName(TargetID),
