@@ -77,6 +77,7 @@ class CGameContext : public IGameServer
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleportTo(IConsole::IResult *pResult, void *pUserData);
 	static void ConGetPos(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddRes(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConSuperMan(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuperMan(IConsole::IResult *pResult, void *pUserData);

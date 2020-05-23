@@ -63,6 +63,18 @@ void CGameContext::ConGetPos(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConAddRes(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int CID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
+	if(pSelf->m_apPlayers[CID])
+	{
+		int added_res = pResult->GetInteger(1);
+		CCharacter* pChr = pSelf->GetPlayerChar(CID);
+		pChr->m_RescueCount += added_res;
+	}
+}
+
 void CGameContext::ChatConInfo(IConsole::IResult *pResult, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;

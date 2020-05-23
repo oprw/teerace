@@ -1749,6 +1749,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("teleport", "ii", CFGFLAG_SERVER, ConTeleport, this, "Teleport ID 1 to ID 2");
 	Console()->Register("teleport_to", "iii", CFGFLAG_SERVER, ConTeleportTo, this, "Teleport ID to (Pos X ; Pos Y)");
 	Console()->Register("get_pos", "i", CFGFLAG_SERVER, ConGetPos, this, "Retrun the position of a player");
+	Console()->Register("add_res", "ii", CFGFLAG_SERVER, ConAddRes, this, "Add some rescues to a player");
 
 	Console()->Register("super", "i", CFGFLAG_SERVER, ConSuperMan, this, "Gives super");
 	Console()->Register("unsuper", "i", CFGFLAG_SERVER, ConUnSuperMan, this, "Takes the super");
