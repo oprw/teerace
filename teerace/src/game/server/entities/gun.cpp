@@ -66,9 +66,6 @@ void CGun::Fire()
 			{
 				new CPlasma(&GameServer()->m_World, m_Pos, normalize(Target->m_Pos - m_Pos), m_Freeze, m_Explosive, 0);
 				m_LastFire = Server()->Tick();
-				
-				if(m_Freeze)
-					Target->UpdateResTick(3 + m_LastFire + Server()->TickSpeed()/g_Config.m_SvPlasmaPerSec);
 			}
 		}
 	}
@@ -95,6 +92,26 @@ void CGun::Tick()
 	}
 	if (m_LastFire + Server()->TickSpeed() / g_Config.m_SvPlasmaPerSec <= Server()->Tick())
 		Fire();
+
+	if(m_Freeze)
+	{
+		CCharacter *aChar[MAX_CLIENTS];
+		int num = -1;
+		num =  GameServer()->m_World.FindEntities(m_Pos, g_Config.m_SvPlasmaRange, (CEntity**)aChar, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+
+		for(int i = 0; i < num; ++i)
+		{
+			if(aChar[i]->IsAlive() == false)
+				continue;
+			
+			int res = GameServer()->Collision()->IntersectLine(m_Pos, aChar[i]->m_Pos,0,0);
+
+			if(res)
+				continue;
+		
+			aChar[i]->UpdateResTick(Server()->Tick() + 1);
+		}
+	}
 
 }
 

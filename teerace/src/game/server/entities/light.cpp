@@ -119,7 +119,7 @@ void CLight::Tick()
 			if(res)
 				continue;
 			
-			aChar[i]->UpdateResTick(Server()->Tick()+3);
+			aChar[i]->UpdateResTick(Server()->Tick() + 1);
 		}
 		
 	}
@@ -134,7 +134,7 @@ void CLight::Tick()
 			GameServer()->m_World.IntersectedCharacters(m_Pos, to, 0.0f, 0);
 		for (auto Char = CharList.begin(); Char != CharList.end(); Char++)
 		{
-			(*Char)->UpdateResTick(Server()->Tick()+3);
+			(*Char)->UpdateResTick(Server()->Tick() + 1);
 		}
 	}
 	
