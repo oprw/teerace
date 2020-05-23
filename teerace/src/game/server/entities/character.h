@@ -135,6 +135,9 @@ public:
 	bool m_TeleGunTeleport;
 	bool m_IsBlueTeleGunTeleport;
 
+	int m_EnableResTick;
+	void UpdateResTick(int Tick);
+		
 	int Team();
 	CCharacterCore* Core() { return &m_Core; };
 	void Pause(bool Pause);

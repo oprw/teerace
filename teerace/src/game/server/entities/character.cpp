@@ -103,6 +103,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_TeleGunTeleport = false;
 	m_IsBlueTeleGunTeleport = false;
 
+	m_EnableResTick = 0;
+	
 	GameServer()->m_pController->OnCharacterSpawn(this);
 
 	return true;
@@ -973,7 +975,8 @@ void CCharacter::DDRaceTick()
 	int resc_index = GameServer()->Collision()->GetPureMapIndex(m_Core.m_Pos);
 	int resc_tile = GameServer()->Collision()->GetTileIndex(resc_index);
 	int resc_ftile = GameServer()->Collision()->GetFTileIndex(resc_index);
-	if(IsGrounded() && !m_Paused && !m_DeepFreeze && resc_tile != TILE_FREEZE && resc_tile != TILE_DFREEZE && resc_ftile != TILE_FREEZE && resc_ftile != TILE_DFREEZE) {
+	if(IsGrounded() && !m_Paused && !m_DeepFreeze && resc_tile != TILE_FREEZE && resc_tile != TILE_DFREEZE && resc_ftile != TILE_FREEZE && resc_ftile != TILE_DFREEZE &&
+	   m_EnableResTick < Server()->Tick()) {
 
 		for(int i = 0; i<NUM_WEAPONS; ++i)
 		{
@@ -995,7 +998,7 @@ void CCharacter::Rescue()
 			int res_index = GameServer()->Collision()->GetPureMapIndex(m_Pos);
 			if (GameServer()->Collision()->GetTileIndex(res_index) == TILE_FREEZE || GameServer()->Collision()->GetFTileIndex(res_index) == TILE_FREEZE ||
 				GameServer()->Collision()->GetTileIndex(res_index) == TILE_DFREEZE || GameServer()->Collision()->GetFTileIndex(res_index) == TILE_DFREEZE ||
-				m_DeepFreeze) {
+				m_DeepFreeze || (m_EnableResTick >= Server()->Tick() && m_FreezeTime > 0)) {
 				m_Core.m_Pos = m_PrevSavePos;
 				m_Pos = m_PrevSavePos;
 				m_PrevPos = m_PrevSavePos;
@@ -1011,9 +1014,13 @@ void CCharacter::Rescue()
 				{
 					m_aWeapons[i] = m_aSavedWeapons[i];
 				}
-
-				m_DeepFreeze = 0;
 				
+				Unfreeze();
+
+				if(g_Config.m_SvRescueRefreshFreeze)
+					Freeze();
+				
+				m_DeepFreeze = 0;
 				m_RescueCount--;
 
 				char aBuf[256];
@@ -1540,6 +1547,13 @@ int CCharacter::Team()
 {
 	return 0;
 }
+
+void CCharacter::UpdateResTick(int Tick)
+{
+	if(m_EnableResTick < Tick)
+		m_EnableResTick = Tick;
+}
+
 /*
 CGameTeams* CCharacter::Teams()
 {

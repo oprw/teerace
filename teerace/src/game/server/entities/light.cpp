@@ -102,7 +102,42 @@ void CLight::Tick()
 		m_Pos += m_Core;
 		Step();
 	}
+	
+	if(m_AngularSpeed)
+	{
+		CCharacter *aChar[MAX_CLIENTS];
+		int num = -1;
+		num =  GameServer()->m_World.FindEntities(m_Pos, m_Length, (CEntity**)aChar, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 
+		for(int i = 0; i < num; ++i)
+		{
+			if(aChar[i]->IsAlive() == false)
+				continue;
+			
+			int res = GameServer()->Collision()->IntersectLine(m_Pos, aChar[i]->m_Pos,0,0);
+
+			if(res)
+				continue;
+			
+			aChar[i]->UpdateResTick(Server()->Tick()+3);
+		}
+		
+	}
+	else
+	{
+		vec2 dir(sin(m_Rotation), cos(m_Rotation));
+		vec2 to;
+
+		to = m_Pos + normalize(dir) * m_Length;
+		
+		std::list<CCharacter *> CharList =
+			GameServer()->m_World.IntersectedCharacters(m_Pos, to, 0.0f, 0);
+		for (auto Char = CharList.begin(); Char != CharList.end(); Char++)
+		{
+			(*Char)->UpdateResTick(Server()->Tick()+3);
+		}
+	}
+	
 	HitCharacter();
 	return;
 

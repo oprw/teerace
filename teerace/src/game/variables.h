@@ -162,6 +162,7 @@ MACRO_CONFIG_STR(SvScore, sv_score, 32, "file", CFGFLAG_SERVER, "Scoring (file)"
 MACRO_CONFIG_INT(SvWallHammer, sv_wall_hammer, 0, 0, 1, CFGFLAG_SERVER, "Enable wall hammer")
 
 MACRO_CONFIG_INT(SvRescueTries, sv_rescue_tries, 5, 0, 100, CFGFLAG_SERVER, "Number of rescue tries")
+MACRO_CONFIG_INT(SvRescueRefreshFreeze, sv_rescue_refresh_freeze, 1, 0, 1, CFGFLAG_SERVER, "Refresh freeze after rescue")
 
 // debug
 #ifdef CONF_DEBUG // this one can crash the server if not used correctly
