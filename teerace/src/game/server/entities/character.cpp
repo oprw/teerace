@@ -183,6 +183,10 @@ bool CCharacter::IsGrounded()
 	flags = GameServer()->Collision()->GetFTileFlags(index);
 	if(tile == TILE_STOPA || (tile == TILE_STOP && flags == ROTATION_0) || (tile ==TILE_STOPS && (flags == ROTATION_0 || flags == ROTATION_180)))
 		return true;
+	tile = GameServer()->Collision()->GetDTileIndex(index);
+	flags = GameServer()->Collision()->GetDTileFlags(index);
+	if(tile == TILE_STOPA || (tile == TILE_STOP && flags == ROTATION_0) || (tile ==TILE_STOPS && (flags == ROTATION_0 || flags == ROTATION_180)))
+		return true;
 
 	return false;
 }
