@@ -107,18 +107,35 @@ void CLight::Tick()
 	{
 		CCharacter *aChar[MAX_CLIENTS];
 		int num = -1;
-		num =  GameServer()->m_World.FindEntities(m_Pos, m_Length, (CEntity**)aChar, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
-
+		float a; //angle
+		int radius = 32.0f; // character size
+		vec2 edgepos;
+		vec2 prevpos;
+		int res;
+		num =  GameServer()->m_World.FindEntities(m_Pos, m_Length*1.2, (CEntity**)aChar, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		
 		for(int i = 0; i < num; ++i)
 		{
 			if(aChar[i]->IsAlive() == false)
 				continue;
 			
-			int res = GameServer()->Collision()->IntersectLine(m_Pos, aChar[i]->m_Pos,0,0);
+			res = GameServer()->Collision()->IntersectNoLaser(m_Pos, aChar[i]->m_Pos,0,0);
 
+			// additional check
 			if(res)
-				continue;
-			
+			{
+				a = angle(aChar[i]->m_Pos-m_Pos);
+				
+				if(aChar[i]->m_Pos.y <= m_Pos.y)
+					edgepos = vec2(aChar[i]->m_Pos.x-radius*cos(a),aChar[i]->m_Pos.y-radius*sin(a));
+				else
+					edgepos = vec2(aChar[i]->m_Pos.x-radius*cos(a),aChar[i]->m_Pos.y+radius*sin(a));
+				
+				int res2 = GameServer()->Collision()->IntersectNoLaser(m_Pos, edgepos,0,&prevpos);
+//				if(res2)
+				if(fabs(prevpos.x-aChar[i]->m_Pos.x) > radius && fabs(prevpos.y-aChar[i]->m_Pos.y))
+					continue;
+			}
 			aChar[i]->UpdateResTick(Server()->Tick() + 1);
 		}
 		

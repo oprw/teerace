@@ -4,7 +4,7 @@ set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 
-$ver = '0.2.4';
+$ver = '0.2.5';
 $pass = '12345';
 
 $srv = $argv[1];
@@ -31,6 +31,9 @@ if($srv == 'solo')
 
 $maplist_type = 'unfinished';
 $records_dir = '/root/.local/share/teeworlds/records/';
+
+if(file_exists(__DIR__.'/'.$db_online))
+	unlink(__DIR__.'/'.$db_online);
 
 
 #if(file_exists($start_file))
@@ -342,7 +345,8 @@ function save_player($buf)
 	if($last_clear != date('d', time()))
 	{
 		$last_clear = date('d', time());
-		unlink(__DIR__.'/'.$db_today);
+		if(file_exists(__DIR__.'/'.$db_today))
+			unlink(__DIR__.'/'.$db_today);
 	}
 
 	$db = new SQLite3(dirname(__FILE__).'/'.$db_today, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
@@ -482,7 +486,7 @@ while(true)
 
 	if(crop_buf() == '!time')
 	{
-		$player_id = bin2hex(parse($out, '][chat]: ', ':'));
+		$player_id = bin2hex(trim(explode(':', $out)[3]));
 
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 		$db_res = $db->querySingle('SELECT "ip" FROM "'.$db_online.'" WHERE "id" = "'.$player_id.'"', true);
