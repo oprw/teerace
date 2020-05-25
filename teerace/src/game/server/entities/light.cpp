@@ -131,7 +131,7 @@ void CLight::Tick()
 				else
 					edgepos = vec2(aChar[i]->m_Pos.x-radius*cos(a),aChar[i]->m_Pos.y+radius*sin(a));
 				
-				int res2 = GameServer()->Collision()->IntersectNoLaser(m_Pos, edgepos,0,&prevpos);
+				//int res2 = GameServer()->Collision()->IntersectNoLaser(m_Pos, edgepos,0,&prevpos);
 //				if(res2)
 				if(fabs(prevpos.x-aChar[i]->m_Pos.x) > radius && fabs(prevpos.y-aChar[i]->m_Pos.y))
 					continue;
