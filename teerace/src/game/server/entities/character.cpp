@@ -64,7 +64,6 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_ActiveWeapon = WEAPON_HAMMER;
 	m_LastWeapon = WEAPON_GUN;
 	m_QueuedWeapon = -1;
-
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
 
@@ -80,6 +79,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_ReckoningTick = 0;
 	mem_zero(&m_SendCore, sizeof(m_SendCore));
 	mem_zero(&m_ReckoningCore, sizeof(m_ReckoningCore));
+	//m_UndoState = (CGameContext::CPlayerRescueState*)malloc(sizeof(CGameContext::CPlayerRescueState));
 
 	GameServer()->m_World.InsertEntity(this);
 	m_Alive = true;
@@ -769,6 +769,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+	m_pPlayer->m_UndoState = CGameContext::GetPlayerState(this, m_pPlayer->GetCID());
 	Unfreeze();
 	// we got to wait 0.5 secs before respawning
 	m_Alive = false;

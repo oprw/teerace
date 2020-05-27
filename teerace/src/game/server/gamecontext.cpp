@@ -2116,6 +2116,9 @@ CGameContext::CPlayerRescueState CGameContext::GetPlayerState(CCharacter * pChar
 	State.m_FreezeTick = pChar->m_FreezeTick;
 	State.m_Pos = pChar->Core()->m_Pos;
 
+	//State.m_CanUndoKill = pChar->m_CanUndoKill;
+	//State.m_UndoState = pChar->m_UndoState;
+
 	State.m_PrevSavePos = pChar->m_PrevSavePos;
 	State.m_RescueCount = pChar->m_RescueCount;
 	State.m_TeleCheckpoint = pChar->m_TeleCheckpoint;
@@ -2144,6 +2147,9 @@ void CGameContext::SetPlayerState(const CPlayerRescueState& State, CCharacter * 
 	pChar->m_Jetpack = State.m_Jetpack;
 	pChar->m_FreezeTime = State.m_FreezeTime;
 	pChar->m_FreezeTick = State.m_FreezeTick;
+
+	//pChar->m_CanUndoKill = State.m_CanUndoKill;
+	//pChar->m_UndoState = State.m_UndoState;
 
 	pChar->m_PrevSavePos = State.m_PrevSavePos;
 	pChar->m_RescueCount = State.m_RescueCount;

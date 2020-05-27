@@ -4,6 +4,7 @@
 #define GAME_SERVER_PLAYER_H
 
 #include "alloc.h"
+#include "gamecontext.h"
 
 
 enum
@@ -139,6 +140,8 @@ public:
 	void SpectatePlayerName(const char *pName);
 	bool m_ShowOthers;
 	bool m_ToDisconnect;
+	CGameContext::CPlayerRescueState m_UndoState;
+	bool m_CanUndoKill = true;
 
 private:
 	CCharacter *m_pCharacter;

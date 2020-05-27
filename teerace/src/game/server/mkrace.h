@@ -21,6 +21,7 @@ CHAT_COMMAND("swap", "?r[playername]", CFGFLAG_SERVERCHAT|CFGFLAG_SERVER, ConSwa
 CHAT_COMMAND("fake", "i[mode] i[from] i[to] r[text]", CFGFLAG_SERVER, ConFake, this, "Send fake message")
 CHAT_COMMAND("unicast", "i[to] r[text]", CFGFLAG_SERVER, ConUnicast, this, "Send broadcast message to single player")
 
+CHAT_COMMAND("uk", "", CFGFLAG_SERVERCHAT|CFGFLAG_SERVER, ConUndoKill, this, "Teleport yourself to the last position before kill")
 CHAT_COMMAND("rescue", "", CFGFLAG_SERVERCHAT|CFGFLAG_SERVER, ConRescue, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)")
 CHAT_COMMAND("res", "", CFGFLAG_SERVERCHAT|CFGFLAG_SERVER, ConRescue_Res, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)")
 CHAT_COMMAND("r", "", CFGFLAG_SERVERCHAT|CFGFLAG_SERVER, ConRescue_R, this, "Teleport yourself out of freeze (use sv_rescue 1 to enable this feature)")

@@ -5,6 +5,7 @@
 
 #include <generated/protocol.h>
 
+#include <game/server/gamecontext.h>
 #include <game/gamecore.h>
 #include <game/server/entity.h>
 

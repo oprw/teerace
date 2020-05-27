@@ -251,7 +251,8 @@ public:
 		bool m_DeepFreeze;
 		int m_FreezeTime;
 		int m_FreezeTick;
-
+		//CPlayerRescueState* m_UndoState;
+		bool m_CanUndoKill;
 		int m_ActiveWeapon;
 		int m_LastWeapon;
 
