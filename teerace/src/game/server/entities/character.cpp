@@ -769,8 +769,15 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
-	m_pPlayer->m_died = true; //to see when the player can use /uk
-	m_pPlayer->m_UndoState = CGameContext::GetPlayerState(this, m_pPlayer->GetCID());
+	if (m_pPlayer->m_died == true)
+	{
+		m_pPlayer->m_PrevUndoState = m_pPlayer->m_UndoState;
+	}
+	else
+	{
+		m_pPlayer->m_died = true; //to see when the player can use /uk
+	}
+
 	Unfreeze();
 	// we got to wait 0.5 secs before respawning
 	m_Alive = false;
@@ -977,17 +984,26 @@ void CCharacter::DDRaceTick()
 	int resc_index = GameServer()->Collision()->GetPureMapIndex(m_Core.m_Pos);
 	int resc_tile = GameServer()->Collision()->GetTileIndex(resc_index);
 	int resc_ftile = GameServer()->Collision()->GetFTileIndex(resc_index);
-	if(IsGrounded() && !m_Paused && !m_DeepFreeze && resc_tile != TILE_FREEZE && resc_tile != TILE_DFREEZE && resc_ftile != TILE_FREEZE && resc_ftile != TILE_DFREEZE &&
-	   m_EnableResTick < Server()->Tick()) {
-
-		for(int i = 0; i<NUM_WEAPONS; ++i)
+	if(IsGrounded())
+	{
+		if(!m_pPlayer->m_died){
+			m_pPlayer->m_PrevUndoState = CGameContext::GetPlayerState(this, m_pPlayer->GetCID());
+		}
+		else
 		{
-			m_aSavedWeapons[i] = m_aWeapons[i];
+			m_pPlayer->m_UndoState = CGameContext::GetPlayerState(this, m_pPlayer->GetCID());
 		}
 		
-		m_PrevSavePos = m_Core.m_Pos;
-		m_SetSavePos = true;
-		
+		if(!m_Paused && !m_DeepFreeze && resc_tile != TILE_FREEZE && resc_tile != TILE_DFREEZE && resc_ftile != TILE_FREEZE && resc_ftile != TILE_DFREEZE &&
+	   m_EnableResTick < Server()->Tick()) {
+
+			for(int i = 0; i<NUM_WEAPONS; ++i)
+			{
+				m_aSavedWeapons[i] = m_aWeapons[i];
+			}
+			m_PrevSavePos = m_Core.m_Pos;
+			m_SetSavePos = true;
+	   }
 	}
 		
 }

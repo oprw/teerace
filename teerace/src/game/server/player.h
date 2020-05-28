@@ -141,6 +141,7 @@ public:
 	bool m_ShowOthers;
 	bool m_ToDisconnect;
 	CGameContext::CPlayerRescueState m_UndoState;
+	CGameContext::CPlayerRescueState m_PrevUndoState;
 	int m_CanUndoKill;
 	bool m_died;
 

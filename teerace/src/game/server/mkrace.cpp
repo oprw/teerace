@@ -394,7 +394,7 @@ void CGameContext::ConUndoKill(IConsole::IResult *pResult, void *pUserData)
 	if (pPlayer->m_CanUndoKill > 0)
 	{			
 		pPlayer->m_died = false;
-		SetPlayerState(pPlayer->m_UndoState, pChr, pResult->m_ClientID);
+		SetPlayerState(pPlayer->m_PrevUndoState, pChr, pResult->m_ClientID);
 		pPlayer->m_CanUndoKill --;
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%d undokill left", pPlayer->m_CanUndoKill);
@@ -405,7 +405,6 @@ void CGameContext::ConUndoKill(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "undokill", "You spend your undokill");
 		return;
 	}
-	
 	
 }
 

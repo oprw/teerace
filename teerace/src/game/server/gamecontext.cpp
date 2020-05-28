@@ -769,7 +769,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	SendChat(-1, CHAT_ALL, ClientID, aBuf);
 	SendChat(-1, CHAT_ALL, ClientID, "\"/res\" - Teleport yourself out of freeze");
 	//SendChat(-1, CHAT_ALL, ClientID, "\"/kill\" - Kill yourself");
-	SendChat(-1, CHAT_ALL, ClientID, "\"/uk\" - Undo kill");
+	SendChat(-1, CHAT_ALL, ClientID, "\"/uk\" - Teleport yourself to the last position before kill");
 	SendChat(-1, CHAT_ALL, ClientID, "\"/pause\" or \"/spec\" - Toggles pause");	
 	SendChat(-1, CHAT_ALL, ClientID, "\"/dr\" - Rescue to location before disconnect");
 	SendChat(-1, CHAT_ALL, ClientID, "\"/swap\" - Swap places with any player");
