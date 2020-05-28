@@ -381,9 +381,9 @@ void CGameContext::ConUndoKill(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
-	if(!pPlayer)
+	if(!pPlayer || !pChr ||  pPlayer->m_died == false || g_Config.m_SvUndoKill == 0)
 		return;
-
+		
 	if (pChr->GameServer()->Collision()->CheckIndexEx(pChr->Core()->m_Pos, TILE_BEGIN)
 	|| pChr->GameServer()->Collision()->CheckIndexEx(pChr->Core()->m_Pos, TILE_END))
 	{
@@ -391,11 +391,14 @@ void CGameContext::ConUndoKill(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "undokill", "Can\'t use command here!");
 		return;
 	}
-
-	if (pPlayer->m_CanUndoKill)
+	if (pPlayer->m_CanUndoKill > 0)
 	{			
-		pPlayer->m_CanUndoKill = false;
+		pPlayer->m_died = false;
 		SetPlayerState(pPlayer->m_UndoState, pChr, pResult->m_ClientID);
+		pPlayer->m_CanUndoKill --;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%d undokill left", pPlayer->m_CanUndoKill);
+		pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "undokill", aBuf);		
 	}
 	else
 	{

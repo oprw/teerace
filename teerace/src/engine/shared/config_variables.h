@@ -106,6 +106,7 @@ MACRO_CONFIG_STR(DbgStressServer, dbg_stress_server, 32, "localhost", CFGFLAG_CL
 MACRO_CONFIG_INT(DbgResizable, dbg_resizable, 0, 0, 0, CFGFLAG_CLIENT, "Enables window resizing")
 
 // mkRace
+MACRO_CONFIG_INT(SvUndoKill, sv_undo_kill, 0, 1, 100, CFGFLAG_SERVER, "Number of undo kill")
 MACRO_CONFIG_INT(SvSwap, sv_swap, 1, 0, 1, CFGFLAG_SERVER, "Turns player swapping on/off")
 MACRO_CONFIG_INT(SvDisconnectRescue, sv_disconnect_rescue, 1, 0, 1, CFGFLAG_SERVER, "Turns disconnect rescue on/off")
 MACRO_CONFIG_INT(SvDisconnectRescueRadius, sv_disconnect_rescue_radius, 32, 0, 1024, CFGFLAG_SERVER, "The radius where no one should stand while disconnect rescuing")

@@ -769,6 +769,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	SendChat(-1, CHAT_ALL, ClientID, aBuf);
 	SendChat(-1, CHAT_ALL, ClientID, "\"/res\" - Teleport yourself out of freeze");
 	//SendChat(-1, CHAT_ALL, ClientID, "\"/kill\" - Kill yourself");
+	SendChat(-1, CHAT_ALL, ClientID, "\"/uk\" - Undo kill");
 	SendChat(-1, CHAT_ALL, ClientID, "\"/pause\" or \"/spec\" - Toggles pause");	
 	SendChat(-1, CHAT_ALL, ClientID, "\"/dr\" - Rescue to location before disconnect");
 	SendChat(-1, CHAT_ALL, ClientID, "\"/swap\" - Swap places with any player");
@@ -2116,7 +2117,7 @@ CGameContext::CPlayerRescueState CGameContext::GetPlayerState(CCharacter * pChar
 	State.m_FreezeTick = pChar->m_FreezeTick;
 	State.m_Pos = pChar->Core()->m_Pos;
 
-	//State.m_CanUndoKill = pChar->m_CanUndoKill;
+	State.m_CanUndoKill = pChar->GetPlayer()->m_CanUndoKill;
 	//State.m_UndoState = pChar->m_UndoState;
 
 	State.m_PrevSavePos = pChar->m_PrevSavePos;
@@ -2148,7 +2149,7 @@ void CGameContext::SetPlayerState(const CPlayerRescueState& State, CCharacter * 
 	pChar->m_FreezeTime = State.m_FreezeTime;
 	pChar->m_FreezeTick = State.m_FreezeTick;
 
-	//pChar->m_CanUndoKill = State.m_CanUndoKill;
+	pChar->GetPlayer()->m_CanUndoKill = State.m_CanUndoKill;
 	//pChar->m_UndoState = State.m_UndoState;
 
 	pChar->m_PrevSavePos = State.m_PrevSavePos;

@@ -769,6 +769,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+	m_pPlayer->m_died = true; //to see when the player can use /uk
 	m_pPlayer->m_UndoState = CGameContext::GetPlayerState(this, m_pPlayer->GetCID());
 	Unfreeze();
 	// we got to wait 0.5 secs before respawning
