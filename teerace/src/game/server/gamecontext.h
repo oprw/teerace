@@ -77,6 +77,7 @@ class CGameContext : public IGameServer
 	static void ConTeleport(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeleportTo(IConsole::IResult *pResult, void *pUserData);
 	static void ConGetPos(IConsole::IResult *pResult, void *pUserData);
+	static void ConAddRes(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConSuperMan(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnSuperMan(IConsole::IResult *pResult, void *pUserData);
@@ -250,7 +251,8 @@ public:
 		bool m_DeepFreeze;
 		int m_FreezeTime;
 		int m_FreezeTick;
-
+		//CPlayerRescueState* m_UndoState;
+		int m_CanUndoKill;
 		int m_ActiveWeapon;
 		int m_LastWeapon;
 

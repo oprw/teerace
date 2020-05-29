@@ -769,6 +769,7 @@ void CGameContext::OnClientEnter(int ClientID)
 	SendChat(-1, CHAT_ALL, ClientID, aBuf);
 	SendChat(-1, CHAT_ALL, ClientID, "\"/res\" - Teleport yourself out of freeze");
 	//SendChat(-1, CHAT_ALL, ClientID, "\"/kill\" - Kill yourself");
+	SendChat(-1, CHAT_ALL, ClientID, "\"/uk\" - Teleport yourself to the last position before kill");
 	SendChat(-1, CHAT_ALL, ClientID, "\"/pause\" or \"/spec\" - Toggles pause");	
 	SendChat(-1, CHAT_ALL, ClientID, "\"/dr\" - Rescue to location before disconnect");
 	SendChat(-1, CHAT_ALL, ClientID, "\"/swap\" - Swap places with any player");
@@ -1749,6 +1750,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("teleport", "ii", CFGFLAG_SERVER, ConTeleport, this, "Teleport ID 1 to ID 2");
 	Console()->Register("teleport_to", "iii", CFGFLAG_SERVER, ConTeleportTo, this, "Teleport ID to (Pos X ; Pos Y)");
 	Console()->Register("get_pos", "i", CFGFLAG_SERVER, ConGetPos, this, "Retrun the position of a player");
+	Console()->Register("add_res", "ii", CFGFLAG_SERVER, ConAddRes, this, "Add some rescues to a player");
 
 	Console()->Register("super", "i", CFGFLAG_SERVER, ConSuperMan, this, "Gives super");
 	Console()->Register("unsuper", "i", CFGFLAG_SERVER, ConUnSuperMan, this, "Takes the super");
@@ -2115,6 +2117,9 @@ CGameContext::CPlayerRescueState CGameContext::GetPlayerState(CCharacter * pChar
 	State.m_FreezeTick = pChar->m_FreezeTick;
 	State.m_Pos = pChar->Core()->m_Pos;
 
+	State.m_CanUndoKill = pChar->GetPlayer()->m_CanUndoKill;
+	//State.m_UndoState = pChar->m_UndoState;
+
 	State.m_PrevSavePos = pChar->m_PrevSavePos;
 	State.m_RescueCount = pChar->m_RescueCount;
 	State.m_TeleCheckpoint = pChar->m_TeleCheckpoint;
@@ -2144,6 +2149,10 @@ void CGameContext::SetPlayerState(const CPlayerRescueState& State, CCharacter * 
 	pChar->m_FreezeTime = State.m_FreezeTime;
 	pChar->m_FreezeTick = State.m_FreezeTick;
 
+	pChar->GetPlayer()->m_CanUndoKill = State.m_CanUndoKill;
+	//pChar->m_UndoState = State.m_UndoState;
+	pChar->Core()->m_Pos = State.m_PrevSavePos;
+	pChar->m_Pos = State.m_PrevSavePos;
 	pChar->m_PrevSavePos = State.m_PrevSavePos;
 	pChar->m_RescueCount = State.m_RescueCount;
 	pChar->m_TeleCheckpoint = State.m_TeleCheckpoint;

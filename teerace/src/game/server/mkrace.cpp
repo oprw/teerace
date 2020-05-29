@@ -376,6 +376,40 @@ void CGameContext::ConRescue(IConsole::IResult *pResult, void *pUserData)
 		pChr->Rescue();
 }
 
+void CGameContext::ConUndoKill(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	CCharacter* pChr = pSelf->GetPlayerChar(pResult->m_ClientID);
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientID];
+	if(!pPlayer || !pChr ||  pPlayer->m_died == false || g_Config.m_SvUndoKill == 0)
+		return;
+		
+	if (pChr->GameServer()->Collision()->CheckIndexEx(pChr->Core()->m_Pos, TILE_BEGIN)
+	|| pChr->GameServer()->Collision()->CheckIndexEx(pChr->Core()->m_Pos, TILE_END))
+	{
+		// cool race time fix
+		pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "undokill", "Can\'t use command here!");
+		return;
+	}
+	if (pPlayer->m_CanUndoKill > 0)
+	{			
+		pPlayer->m_died = false;
+		SetPlayerState(pPlayer->m_PrevUndoState, pChr, pResult->m_ClientID);
+		pChr->Core()->m_Vel = vec2(0, 0);
+
+		pPlayer->m_CanUndoKill --;
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "%d undokill left", pPlayer->m_CanUndoKill);
+		pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "undokill", aBuf);		
+	}
+	else
+	{
+		pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "undokill", "You spend your undokill");
+		return;
+	}
+	
+}
+
 void CGameContext::ConRescue_R(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;

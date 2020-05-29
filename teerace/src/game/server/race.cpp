@@ -63,6 +63,18 @@ void CGameContext::ConGetPos(IConsole::IResult *pResult, void *pUserData)
 	}
 }
 
+void CGameContext::ConAddRes(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	int CID = clamp(pResult->GetInteger(0), 0, (int)MAX_CLIENTS-1);
+	if(pSelf->m_apPlayers[CID])
+	{
+		int added_res = pResult->GetInteger(1);
+		CCharacter* pChr = pSelf->GetPlayerChar(CID);
+		pChr->m_RescueCount += added_res;
+	}
+}
+
 void CGameContext::ChatConInfo(IConsole::IResult *pResult, void *pUser)
 {
 	CGameContext *pSelf = (CGameContext *)pUser;
@@ -126,7 +138,7 @@ void CGameContext::ChatConHelp(IConsole::IResult *pResult, void *pUser)
 
 	pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "---Command List---");
 	pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "\"/res\" - Teleport yourself out of freeze");
-	//pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "\"/kill\" - Kill yourself");
+	pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "\"/uk\" - Undo kill");
 	pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "\"/pause\" or \"/spec\"  - Toggles pause");
 	pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "\"/dr\" - Rescue to location before disconnect");
 	pSelf->m_pChatConsole->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat", "\"/swap\" - Swap places with any player");
