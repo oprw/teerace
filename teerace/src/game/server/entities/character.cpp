@@ -550,7 +550,7 @@ void CCharacter::GiveNinja()
 {
 	m_Ninja.m_ActivationTick = Server()->Tick();
 	m_Ninja.m_IndicatorTick = Server()->Tick();
-	m_Ninja.m_CurrentMoveTime = -1;
+	//m_Ninja.m_CurrentMoveTime = -1;
 	if(!m_aWeapons[WEAPON_NINJA].m_Got)
 		GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, CmaskRace(GameServer(), m_pPlayer->GetCID()));
 	m_aWeapons[WEAPON_NINJA].m_Got = true;
