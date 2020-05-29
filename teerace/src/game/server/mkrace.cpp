@@ -395,6 +395,8 @@ void CGameContext::ConUndoKill(IConsole::IResult *pResult, void *pUserData)
 	{			
 		pPlayer->m_died = false;
 		SetPlayerState(pPlayer->m_PrevUndoState, pChr, pResult->m_ClientID);
+		pChr->Core()->m_Vel = vec2(0, 0);
+
 		pPlayer->m_CanUndoKill --;
 		char aBuf[256];
 		str_format(aBuf, sizeof(aBuf), "%d undokill left", pPlayer->m_CanUndoKill);

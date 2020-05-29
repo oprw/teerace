@@ -2151,7 +2151,8 @@ void CGameContext::SetPlayerState(const CPlayerRescueState& State, CCharacter * 
 
 	pChar->GetPlayer()->m_CanUndoKill = State.m_CanUndoKill;
 	//pChar->m_UndoState = State.m_UndoState;
-
+	pChar->Core()->m_Pos = State.m_PrevSavePos;
+	pChar->m_Pos = State.m_PrevSavePos;
 	pChar->m_PrevSavePos = State.m_PrevSavePos;
 	pChar->m_RescueCount = State.m_RescueCount;
 	pChar->m_TeleCheckpoint = State.m_TeleCheckpoint;
