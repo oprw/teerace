@@ -4,8 +4,7 @@
 #define GAME_VERSION_H
 #include <generated/nethash.cpp>
 //#define GAME_VERSION "0.7.3, mkRace " MKRACE_VERSION ""
-//#define GAME_VERSION "0.7.3, TRACE " TEERACE_VERSION ""
-#define GAME_VERSION "0.7.3, ^_^"
+#define GAME_VERSION "0.7.3, " TEERACE_VERSION
 #define GAME_NETVERSION_HASH_FORCED "802f1be60a05665f"
 #define GAME_NETVERSION "0.7 " GAME_NETVERSION_HASH_FORCED
 #define RACE_VERSION "4.0-dev"

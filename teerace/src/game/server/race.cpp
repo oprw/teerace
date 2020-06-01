@@ -43,7 +43,7 @@ void CGameContext::ConTeleportTo(IConsole::IResult *pResult, void *pUserData)
 		if(pChr)
 		{
 			pChr->SetPos(TelePos);
-			pSelf->RaceController()->StopRace(CID);
+			//pSelf->RaceController()->StopRace(CID);
 		}
 		else
 			pSelf->m_apPlayers[CID]->m_ViewPos = TelePos;
