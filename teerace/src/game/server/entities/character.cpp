@@ -769,6 +769,7 @@ bool CCharacter::IncreaseArmor(int Amount)
 
 void CCharacter::Die(int Killer, int Weapon)
 {
+
 	if (m_pPlayer->m_died == true)
 	{
 		m_pPlayer->m_PrevUndoState = m_pPlayer->m_UndoState;
@@ -1104,19 +1105,17 @@ void CCharacter::DDRacePostCoreTick()
 
 	int CurrentIndex = GameServer()->Collision()->GetMapIndex(m_Pos);
 	HandleSkippableTiles(CurrentIndex);
-	HandleTiles(CurrentIndex);
 
-	// teleport gun
-	if (m_TeleGunTeleport)
+	// handle Anti-Skip tiles
+	std::list < int > Indices = GameServer()->Collision()->GetMapIndices(m_PrevPos, m_Pos);
+	if (!Indices.empty())
+		for (std::list < int >::iterator i = Indices.begin(); i != Indices.end(); i++)
+			HandleTiles(*i);
+	else
 	{
-		GameServer()->CreateDeath(m_Pos, m_pPlayer->GetCID());
-		m_Core.m_Pos = m_TeleGunPos;
-		if(!m_IsBlueTeleGunTeleport)
-			m_Core.m_Vel = vec2(0, 0);
-		GameServer()->CreateDeath(m_TeleGunPos, m_pPlayer->GetCID());
-		//GameServer()->CreateSound(m_TeleGunPos, SOUND_WEAPON_SPAWN, Teams()->TeamMask(Team(), -1, m_pPlayer->GetCID()));
-		m_TeleGunTeleport = false;
-		m_IsBlueTeleGunTeleport = false;
+		HandleTiles(CurrentIndex);
+		m_LastIndexTile = 0;
+		m_LastIndexFrontTile = 0;
 	}
 
 }
