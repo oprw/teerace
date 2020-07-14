@@ -1,10 +1,10 @@
 <?php
-date_default_timezone_set('Europe/Moscow');
+date_default_timezone_set('UTC');
 set_time_limit(0);
 error_reporting(E_ERROR | E_WARNING | E_PARSE);
 
 
-$ver = '0.2.5';
+$ver = '0.2.6';
 $pass = '12345';
 
 $srv = $argv[1];
@@ -13,6 +13,7 @@ $cmd_file = __DIR__.'/cmd';
 $start_file = __DIR__.'/server_started';
 $db_today = 'db_today';
 $db_online = 'db_online';
+$db_players = 'db_players';
 		
 if($srv == 'solo')
 {
@@ -23,6 +24,7 @@ if($srv == 'solo')
 	$start_file .= '_solo';
 	$db_today .= '_solo';
 	$db_online .= '_solo';
+	$db_players .= '_solo';
 }else{
 	$maps_dir = __DIR__.'/data/maps/';
 	$port = '8403';
@@ -246,6 +248,7 @@ function player_stat($buf, $parse_from_text='')
 {
 	global $records_dir, $maps_dir;
 	$curr_maps_arr = preg_grep('/^([^.])/', scandir($maps_dir));
+	unset($curr_maps_arr[array_search('solo',$curr_maps_arr)]);
 	if($parse_from_text)
 	{
 		$player_name = explode(':', $buf)[6];
@@ -304,6 +307,8 @@ function players_top($player_name='', $num_count='')
 	{
 
 		$db_player_name = $arr['player_name'];
+		if($db_player_name == '72756e')
+			continue;
 		$db_map_name = $arr['map_name'];	
 		$db_map_name = str_replace('_record.dtb', '.map', hex2bin($db_map_name));
 		if(in_array($db_map_name, $curr_maps_arr))
@@ -338,9 +343,9 @@ function players_top($player_name='', $num_count='')
 	}
 }
 
-function save_player($buf)
+function save_player()
 {
-	global $db_today, $last_clear;
+	global $db_online, $db_today, $db_players, $last_clear, $player_id, $player_ip, $player_nick;
 
 	if($last_clear != date('d', time()))
 	{
@@ -349,12 +354,28 @@ function save_player($buf)
 			unlink(__DIR__.'/'.$db_today);
 	}
 
+	// save in online db
+	$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+	$db->query('CREATE TABLE IF NOT EXISTS "'.$db_online.'" ("id" VARCHAR NOT NULL, "ip" VARCHAR NOT NULL, "nick" VARCHAR NOT NULL)');
+	$db->exec('INSERT INTO "'.$db_online.'" ("id", "ip", "nick") SELECT "'.$player_id.'", "'.$player_ip.'", "'.$player_nick.'" WHERE NOT EXISTS (SELECT id FROM '.$db_online.' WHERE id = "'.$player_id.'");');
+	$db->close();
+
+	// save in today db
 	$db = new SQLite3(dirname(__FILE__).'/'.$db_today, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
 	$db->query('CREATE TABLE IF NOT EXISTS "'.$db_today.'" ("player_ip" VARCHAR NOT NULL)');
-
-	$db_res = $db->querySingle('SELECT "player_ip" FROM "'.$db_today.'" WHERE player_ip = "'.$buf.'"', true);
+	$db_res = $db->querySingle('SELECT "player_ip" FROM "'.$db_today.'" WHERE player_ip = "'.$player_ip.'"', true);
 	if(!count($db_res))
-			$db->exec('INSERT INTO "'.$db_today.'" ("player_ip") VALUES ("'.$buf.'")');
+		$db->exec('INSERT INTO "'.$db_today.'" ("player_ip") VALUES ("'.$player_ip.'")');
+	$db->close();
+
+	// save in players db
+	$db = new SQLite3(dirname(__FILE__).'/'.$db_players, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+	$db->query('CREATE TABLE IF NOT EXISTS "'.$db_players.'" ("nick" VARCHAR NOT NULL, "time" VARCHAR NOT NULL)');
+	$db_res = $db->querySingle('SELECT "nick" FROM "'.$db_players.'" WHERE nick = "'.$player_nick.'"', true);
+	if(!count($db_res))
+		$db->exec('INSERT INTO "'.$db_players.'" ("nick", "time") VALUES ("'.$player_nick.'", "'.time().'")');
+	else
+		$db->exec('UPDATE "'.$db_players.'" SET time = "'.time().'" WHERE nick = "'.$player_nick.'"');
 	$db->close();
 }
 
@@ -440,14 +461,8 @@ while(true)
 			$player_nick = explode(':', $out)[1].'-trash';
 			$player_nick = parse($player_nick, ' ', "\n");
 			$player_nick = bin2hex(trim($player_nick));
-
 			
-			$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
-			$db->query('CREATE TABLE IF NOT EXISTS "'.$db_online.'" ("id" VARCHAR NOT NULL, "ip" VARCHAR NOT NULL, "nick" VARCHAR NOT NULL)');
-			$db->exec('INSERT INTO "'.$db_online.'" ("id", "ip", "nick") SELECT "'.$player_id.'", "'.$player_ip.'", "'.$player_nick.'" WHERE NOT EXISTS (SELECT id FROM '.$db_online.' WHERE id = "'.$player_id.'");');
-			$db->close();
-			
-			save_player($player_ip);
+			save_player();
 		}
 	}
 
@@ -484,6 +499,16 @@ while(true)
 	}
 
 
+	if(substr($out, 12, 7) == '[vote]:')
+	{
+		$trash = explode(' ', $out);
+		if($trash[4] == 'option::[cfg]')
+			send_cmd('vote yes');
+		if($trash[7] == 'run::ban')
+			send_cmd('vote no');
+	}
+
+
 	if(crop_buf() == '!time')
 	{
 		$player_id = bin2hex(trim(explode(':', $out)[3]));
@@ -508,6 +533,42 @@ while(true)
 		send_msg($msg);
 	}
 
+	if(substr(crop_buf(), 0, 6) == '!seen ')
+	{
+		$player_id = bin2hex(trim(explode(':', $out)[3]));
+
+		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+		$db_res = $db->querySingle('SELECT "ip" FROM "'.$db_online.'" WHERE "id" = "'.$player_id.'"', true);
+		$db->close();
+
+		$ipinfo = send('https://api.ipdata.co/'.hex2bin($db_res['ip']).'/time_zone/?api-key=9b8a49e10bc989a900a2d1052999045d9450c3cee479de571ac81d9e');
+		$offset = parse($ipinfo, '"offset": "', '"');
+		if($offset == '-1')
+			$offset = 'err';
+		$offset = str_replace('+0', '+', $offset);
+		$offset = rtrim($offset, '0');
+
+		$player_name = explode(':', $out)[6];
+		$player_name = str_replace(' !seen ', '', $player_name);
+		$player_name = trim($player_name);
+
+		$db = new SQLite3(dirname(__FILE__).'/'.$db_players, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
+		$db_res = $db->querySingle('SELECT "time" FROM "'.$db_players.'" WHERE "nick" = "'.bin2hex($player_name).'"', true);
+		$db->close();
+
+		if(count($db_res))
+		{
+			$last_seen = $db_res['time'];
+			if(is_numeric($offset))
+				$last_seen = $last_seen + ($offset*60*60);
+			$msg = 'The player "'.$player_name.'" was on the server '.date('d.m.Y \i\n H:i', $last_seen);
+		}else{
+			$msg = 'Unknown player';
+		}
+
+		send_msg($msg);
+	}
+
 	if(crop_buf() == '!online')
 	{
 		$db = new SQLite3(dirname(__FILE__).'/'.$db_online, SQLITE3_OPEN_CREATE | SQLITE3_OPEN_READWRITE);
@@ -515,10 +576,6 @@ while(true)
 		$db->close();
 		$msg = 'Now '.$count_online.' player(s) online';
 		send_msg($msg);
-	}
-	if(crop_buf() == '!stat_all')
-	{
-		send_msg('Use "!top" instead');
 	}
 	if(crop_buf() == '!top' or crop_buf() == '!top5')
 	{
