@@ -217,6 +217,52 @@ int CCollision::GetMapIndex(vec2 Pos) const
 		return -1;
 }
 
+std::list<int> CCollision::GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices) const
+{
+	std::list< int > Indices;
+	float d = distance(PrevPos, Pos);
+	int End(d + 1);
+	if (!d)
+	{
+		int Nx = clamp((int)Pos.x / 32, 0, m_Width - 1);
+		int Ny = clamp((int)Pos.y / 32, 0, m_Height - 1);
+		int Index = Ny * m_Width + Nx;
+
+		if (TileExists(Index))
+		{
+			Indices.push_back(Index);
+			return Indices;
+		}
+		else
+			return Indices;
+	}
+	else
+	{
+		float a = 0.0f;
+		vec2 Tmp = vec2(0, 0);
+		int Nx = 0;
+		int Ny = 0;
+		int Index, LastIndex = 0;
+		for (int i = 0; i < End; i++)
+		{
+			a = i / d;
+			Tmp = mix(PrevPos, Pos, a);
+			Nx = clamp((int)Tmp.x / 32, 0, m_Width - 1);
+			Ny = clamp((int)Tmp.y / 32, 0, m_Height - 1);
+			Index = Ny * m_Width + Nx;
+			if (TileExists(Index) && LastIndex != Index)
+			{
+				if (MaxIndices && Indices.size() > MaxIndices)
+					return Indices;
+				Indices.push_back(Index);
+				LastIndex = Index;
+			}
+		}
+
+		return Indices;
+	}
+}
+
 bool CCollision::TileExists(int Index) const
 {
 	if(Index < 0)

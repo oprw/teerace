@@ -1114,8 +1114,6 @@ void CCharacter::DDRacePostCoreTick()
 	else
 	{
 		HandleTiles(CurrentIndex);
-		m_LastIndexTile = 0;
-		m_LastIndexFrontTile = 0;
 	}
 
 }

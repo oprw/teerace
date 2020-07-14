@@ -7,6 +7,7 @@
 #include <base/vmath.h>
 
 #include <vector>
+#include <list>
 #include <map>
 
 enum
@@ -124,6 +125,7 @@ public:
 	bool TileExistsNext(int Index) const;
 	vec2 CpSpeed(int index, int Flags = 0) const;
 	int GetMapIndex(vec2 Pos) const;
+	std::list<int> GetMapIndices(vec2 PrevPos, vec2 Pos, unsigned MaxIndices = 0) const;
 	int IsEvilTeleport(int Index) const;
 	int IsCheckTeleport(int Index) const;
 	int IsCheckEvilTeleport(int Index) const;
