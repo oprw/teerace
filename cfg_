@@ -17,6 +17,7 @@ sv_player_slots 60
 sv_slash_me 0
 sv_pauseable 1
 sv_pause_frequency 0
+sv_undo_kill 0
 
 tune laser_bounce_num 1
 tune laser_bounce_cost 0
